@@ -5,21 +5,21 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/game.sol";
 
 contract testGame {
-  game gameInstance;
+  DipDapDoe gameInstance;
 
   constructor() public {
-    gamaeInstance = game(DeployedAddresses.game());
+    gameInstance = DipDapDoe(DeployedAddresses.game());
   }
 
   function testInitialEmpty() public {
-    Asset.equal(gameInstance.getOpenGames().length, 0, "the gamearray should be empty initially");
+    Assert.equal(gameInstance.getOpenGames().length, 0, "the gamearray should be empty initially");
   }
 
   function testHashingFunction() public {
     bytes32 hash1 = gameInstance.saltedHash(123, "my salt goes here");
     bytes32 hashA = libString.saltedHash(123, "my salt goes here");
 
-    bytes32 hash2 = gamesInstance.saltedHash(123, "my salt 2 goes here");
+    bytes32 hash2 = gameInstance.saltedHash(123, "my salt 2 goes here");
     bytes32 hashB = libString.saltedHash(123, "my salt 2 goes here");
 
     bytes32 hash3 = gameInstance.saltedHash(234, "my salt goes here");
