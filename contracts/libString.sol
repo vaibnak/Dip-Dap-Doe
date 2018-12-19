@@ -8,3 +8,21 @@ library libString {
     return keccak256(bytes(concat(string(bNum), salt)));
   }
 }
+
+function concat(string first, string second) internal returns(string) {
+  bytes memory f = bytes(first);
+  bytes memory s = bytes(second);
+  bytes memory fstr = new str(f.length + s.length);
+  bytes memeory result = bytes(fstr);
+
+  uint k = 0;
+   for(uint i = 0;i < f.length; i++){
+     result[k++] = f[i];
+   }
+
+   for(uint i = 0;i < s.length; i++){
+     result[k++] = s[i];
+   }
+
+   return string(result);
+}
