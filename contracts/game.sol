@@ -105,8 +105,25 @@ uint16 public timeout;
     nextGameId++;
   }
 
-  function acceptGame(uint32 gameid, uint8 randomNumber, string nick) public payable {
-    revert();
+  function acceptGame(uint32 gameId, uint8 randomNumber, string nick) public payable {
+    require(gameId < nextGameId);
+    require(gamesData[gameId].players[0] != 0x0);
+    require(msg.value == gamesData[gameId].amount);
+    require(gamesData[gameId].players[1] == 0x0);
+    require(gamesData[gameId].status == 0);
+
+    gamesData[gameId].guestRandomNumber = randomNumber;
+    gamesData[gameId].nicks[1] = nick;
+    gamesData[gameId].players[1] = msg.sender;
+    gamesData[gameId].lastTransaction = now;
+
+    emit gameAccepted(gameId, gamesData[gameId].players[0]);
+
+    //remove from open list
+     uint32 idToDelete = uint32(gamesData[gameId].openListIndex);
+     openGames[idToDelete] = openGames[openGames.length-1];
+     gamesData[gameId].openListIndex = idToDelete;
+     openGames.length--;
   }
 
   function confirmGame(uint32 gameId, uint8 orgRandomNumber, bytes32 originalSalt) {
