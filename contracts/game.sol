@@ -153,11 +153,60 @@ uint16 public timeout;
   }
 
   function markPosition(uint32 gameId, uint8 cell) public {
-    revert();
+    require(gameId < nextGameId);
+    require(cell <= 8);
+
+    uint8 [9]storage cells = gamesData[gameId].cells;
+    require(cells[cell] = 0);
+
+    if(gamesData[gameId].status == 1) {
+      require(gamesData[gameId].players[0] == msg.sender);
+
+      cells[cell] = 1;
+      emit positionMarked(gameId, gamesData[gameId].players[1]);
+    }else if(gamesData[gameId].status == 2){
+      require(gamesDara[gameId].players[1] == msg.sender);
+      cells[cell] = 2;
+      emit positionMarked(gameId, gamesData[gameId].players[0]);
+    }else {
+      revert();
+    }
+
+    gamesData[gameId].lastTransactioin = now;
+
+
+        if((cells[0] & cells [1] & cells [2] != 0x0) || (cells[3] & cells [4] & cells [5] != 0x0) ||
+        (cells[6] & cells [7] & cells [8] != 0x0) || (cells[0] & cells [3] & cells [6] != 0x0) ||
+        (cells[1] & cells [4] & cells [7] != 0x0) || (cells[2] & cells [5] & cells [8] != 0x0) ||
+        (cells[0] & cells [4] & cells [8] != 0x0) || (cells[2] & cells [4] & cells [6] != 0x0)) {
+            // winner
+            gamesData[gameIdx].status = 10 + cells[cell];  // 11 or 12
+            emit GameEnded(gameIdx, gamesData[gameIdx].players[0]);
+            emit GameEnded(gameIdx, gamesData[gameIdx].players[1]);
+        }
+        else if(cells[0] != 0x0 && cells[1] != 0x0 && cells[2] != 0x0 &&
+            cells[3] != 0x0 && cells[4] != 0x0 && cells[5] != 0x0 && cells[6] != 0x0 &&
+            cells[7] != 0x0 && cells[8] != 0x0) {
+            // draw
+            gamesData[gameIdx].status = 10;
+            emit GameEnded(gameIdx, gamesData[gameIdx].players[0]);
+            emit GameEnded(gameIdx, gamesData[gameIdx].players[1]);
+        }
+        else {
+            if(cells[cell] == 1){
+                gamesData[gameIdx].status = 2;
+            }
+            else if(cells[cell] == 2){
+                gamesData[gameIdx].status = 1;
+            }
+            else {
+                revert();
+            }
+       }
   }
 
   function saltedHash(uint8 randomNumber, string salt) public pure returns (bytes32) {
-    return " ";
+    return libString.saltedHash(randomNumber, salt);
   }
 
   //Default
