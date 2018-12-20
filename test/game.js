@@ -1,4 +1,4 @@
-const dipDapDoe = artifacts.require("./game.sol");
+const dipDapDoe = artifacts.require("./DipDapDoe.sol");
 const libString = artifacts.require("./libString");
 
 let gameInstance, libStringInstance;
@@ -15,19 +15,19 @@ contract('dipDapDoe', function(accounts) {
   });
 
   it("should start with not games at beginning", async function(){
-    let gamesAddr = await gamesInstance.getOpenGames.call();
+    let gamesAddr = await gameInstance.getOpenGames.call();
     assert.deepEqual(gamesAddr, [], "shuld have zero games at beginning");
   });
 
   it("should use the saltedHash function from the library", async function(){
     let hash1 = await libStringInstance.saltedHash.call(123, "my salt 1");
-     let hashA = await gamesInstance.saltedHash.call(123, "my salt 1");
+     let hashA = await gameInstance.saltedHash.call(123, "my salt 1");
 
      let hash2 = await libStringInstance.saltedHash.call(123, "my salt 2");
-     let hashB = await gamesInstance.saltedHash.call(123, "my salt 2");
+     let hashB = await gameInstance.saltedHash.call(123, "my salt 2");
 
      let hash3 = await libStringInstance.saltedHash.call(234, "my salt 1");
-     let hashC = await gamesInstance.saltedHash.call(234, "my salt 1");
+     let hashC = await gameInstance.saltedHash.call(234, "my salt 1");
 
      assert.equal(hash1, hashA, "Contract hashes should match the library output")
      assert.equal(hash2, hashB, "Contract hashes should match the library output")

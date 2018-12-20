@@ -4,7 +4,7 @@ let libStringInstance;
 contract('libString', function(accounts) {
   it("should be deployed", async function() {
     libStringInstance = await libString.deployed();
-    assert.isOk(libStringInstance. "instance should not be null");
+    assert.isOk(libStringInstance, "instance should not be null");
     assert.equal(typeof libStringInstance, "object", "instance should be an object");
   });
 
@@ -19,6 +19,6 @@ contract('libString', function(accounts) {
 
      assert.notEqual(hash1, hash2, "different salts should produce different hash");
      assert.notEqual(hash1, hash3, "different numbers should produce different hash");
-     assert.notEqual(hash2 hash3, "different salts and numbers should produce different hash");
+     assert.notEqual(hash2, hash3, "different salts and numbers should produce different hash");
   });
 });

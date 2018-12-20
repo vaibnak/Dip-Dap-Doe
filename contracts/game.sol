@@ -6,7 +6,7 @@ contract DipDapDoe {
 //dataModel
 struct Game {
   //this game`s position in getOpenGames[]
-  uint32 listIndex;
+  uint32 openListIndex;
 
   uint8[9] cells;
  //0 => not started, 1 => player1 , 2 => player2 ,
@@ -18,7 +18,7 @@ struct Game {
 
   address[2] players;
   string[2] nicks;
-  uint[2] lastTransactions; //timestamp => blocknumber
+  uint lastTransaction; //timestamp => blocknumber
   bool[2] withdrawn;
 
   bytes32 creatorHash;
@@ -38,10 +38,10 @@ uint16 public timeout;
 
   //events
   event gameCreated(uint32 indexed gameId);
-  event gameAccepted(uint32 indexed gameId);
-  event gameStarted(uint32 indexed gameId);
-  event positionMarked(uint32 indexed gameId);
-  event gameEnded(uint32 gameId);
+  event gameAccepted(uint32 indexed gameId, address indexed opponent);
+  event gameStarted(uint32 indexed gameId, address indexed opponent);
+  event positionMarked(uint32 indexed gameId, address indexed opponent);
+  event gameEnded(uint32 gameId, address indexed opponent);
 
   constructor(uint16 givenTimeout) public {
     if(givenTimeout != 0){
@@ -66,8 +66,8 @@ uint16 public timeout;
          );
   }
 
-  function getGameTimeStamp(uint32 gameId) public view returns(uint lastTransaction){
-    return (gameData[gameId].lastTransaction);
+  function getGameTimeStamp(uint32 gameId) public view returns(uint256 lastTransaction){
+    return (gamesData[gameId].lastTransaction);
   }
 
   function getGamePlayers(uint32 gameId) public view
@@ -88,15 +88,15 @@ uint16 public timeout;
 
   //operations
 
-  function createGame(string randomNumberHash, string nick) public payable returns (uint32 gameId) {
-   require(nextGameID+1 > nextGameId);
+  function createGame(bytes32 randomNumberHash, string nick) public payable returns (uint32 gameId) {
+   require(nextGameId+1 > nextGameId);
 
    gamesData[nextGameId].openListIndex = uint32(openGames.length);
-   gamesData[nextGameID].creatorHash = randomNumberHash;
-   gamesData[nextGameID].amount = msg.value;
-   gamesData[nextGameID].nicks[0] = nick;
-   gamesData[nextGameID].players[0] = msg.sender;
-   gamesData[nextGameID].lastTransaction = now;
+   gamesData[nextGameId].creatorHash = randomNumberHash;
+   gamesData[nextGameId].amount = msg.value;
+   gamesData[nextGameId].nicks[0] = nick;
+   gamesData[nextGameId].players[0] = msg.sender;
+   gamesData[nextGameId].lastTransaction = now;
    openGames.push(nextGameId);
 
    gameId = nextGameId;
@@ -126,7 +126,7 @@ uint16 public timeout;
      openGames.length--;
   }
 
-  function confirmGame(uint32 gameId, uint8 orgRandomNumber, bytes32 originalSalt) {
+  function confirmGame(uint32 gameId, uint8 orgRandomNumber, string originalSalt) {
      require(gameId < nextGameId);
      require(gamesData[gameId].players[0] == msg.sender);
      require(gamesData[gameId].players[1] != 0x0);
@@ -136,7 +136,7 @@ uint16 public timeout;
      if(computedHash != gamesData[gameId].creatorHash){
        gamesData[gameId].status = 12;
        emit gameEnded(gameId, msg.sender);
-       emit gameEnded(gameid, gamesData[gameId].players[1]);
+       emit gameEnded(gameId, gamesData[gameId].players[1]);
        return;
      }
 
@@ -146,8 +146,8 @@ uint16 public timeout;
        gamesData[gameId].status = 1;
        emit gameStarted(gameId, gamesData[gameId].players[1]);
      }else {
-       gameData[gameId].status = 2;
-       emit gameStarted(gameId, gameData[gameId].players[1]);
+       gamesData[gameId].status = 2;
+       emit gameStarted(gameId, gamesData[gameId].players[1]);
      }
 
   }
@@ -157,7 +157,7 @@ uint16 public timeout;
     require(cell <= 8);
 
     uint8 [9]storage cells = gamesData[gameId].cells;
-    require(cells[cell] = 0);
+    require(cells[cell] == 0);
 
     if(gamesData[gameId].status == 1) {
       require(gamesData[gameId].players[0] == msg.sender);
@@ -165,14 +165,14 @@ uint16 public timeout;
       cells[cell] = 1;
       emit positionMarked(gameId, gamesData[gameId].players[1]);
     }else if(gamesData[gameId].status == 2){
-      require(gamesDara[gameId].players[1] == msg.sender);
+      require(gamesData[gameId].players[1] == msg.sender);
       cells[cell] = 2;
       emit positionMarked(gameId, gamesData[gameId].players[0]);
     }else {
       revert();
     }
 
-    gamesData[gameId].lastTransactioin = now;
+    gamesData[gameId].lastTransaction = now;
 
 
         if((cells[0] & cells [1] & cells [2] != 0x0) || (cells[3] & cells [4] & cells [5] != 0x0) ||
@@ -180,24 +180,24 @@ uint16 public timeout;
         (cells[1] & cells [4] & cells [7] != 0x0) || (cells[2] & cells [5] & cells [8] != 0x0) ||
         (cells[0] & cells [4] & cells [8] != 0x0) || (cells[2] & cells [4] & cells [6] != 0x0)) {
             // winner
-            gamesData[gameIdx].status = 10 + cells[cell];  // 11 or 12
-            emit GameEnded(gameIdx, gamesData[gameIdx].players[0]);
-            emit GameEnded(gameIdx, gamesData[gameIdx].players[1]);
+            gamesData[gameId].status = 10 + cells[cell];  // 11 or 12
+            emit gameEnded(gameId, gamesData[gameId].players[0]);
+            emit gameEnded(gameId, gamesData[gameId].players[1]);
         }
         else if(cells[0] != 0x0 && cells[1] != 0x0 && cells[2] != 0x0 &&
             cells[3] != 0x0 && cells[4] != 0x0 && cells[5] != 0x0 && cells[6] != 0x0 &&
             cells[7] != 0x0 && cells[8] != 0x0) {
             // draw
-            gamesData[gameIdx].status = 10;
-            emit GameEnded(gameIdx, gamesData[gameIdx].players[0]);
-            emit GameEnded(gameIdx, gamesData[gameIdx].players[1]);
+            gamesData[gameId].status = 10;
+            emit gameEnded(gameId, gamesData[gameId].players[0]);
+            emit gameEnded(gameId, gamesData[gameId].players[1]);
         }
         else {
             if(cells[cell] == 1){
-                gamesData[gameIdx].status = 2;
+                gamesData[gameId].status = 2;
             }
             else if(cells[cell] == 2){
-                gamesData[gameIdx].status = 1;
+                gamesData[gameId].status = 1;
             }
             else {
                 revert();

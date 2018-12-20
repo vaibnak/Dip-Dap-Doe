@@ -12,6 +12,6 @@ contract testLibString {
 
   Assert.notEqual(hash1, hash2, "different salts should produce different hash");
   Assert.notEqual(hash1, hash3, "different numbers should produce different hash");
-  Assert.notEqual(hash2, hash2, "different salts and number should produce different hash");
+  Assert.notEqual(hash2, hash3, "different salts and number should produce different hash");
   }
 }
