@@ -36,7 +36,7 @@ contract DipDapDoe {
     revert();
   }
 
-  function hashNumber(uint8 randomNumber, string salt) public pure returns (bytes32) {
+  function saltedHash(uint8 randomNumber, string salt) public pure returns (bytes32) {
     return " ";
   }
 

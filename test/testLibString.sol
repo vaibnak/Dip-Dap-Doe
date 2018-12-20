@@ -5,7 +5,7 @@ import "../contracts/libString.sol";
 contract testLibString {
   function testSaltedHash() public {
     bytes32 hash1 = libString.saltedHash(123, "vaibhav Gupta");
-    bytes32 hash2 = libString.saltedHasg(123, "vinayak Gupta");
+    bytes32 hash2 = libString.saltedHash(123, "vinayak Gupta");
     bytes32 hash3 = libString.saltedHash(234, "vaibhav Gupta");
 
     Assert.isNotZero(hash1, "salted hash should be zero");
