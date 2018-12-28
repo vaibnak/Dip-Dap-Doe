@@ -1,0 +1,3 @@
+Dip-dap-doe contract address: 0x4B21990964796a1aA4B62381F4B703b2934DecDD
+libstring contract address: 0x51fDFD17c2437a7619D6A620C6c08dF1Ae3ee927
+
