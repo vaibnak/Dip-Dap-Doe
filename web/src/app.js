@@ -1,33 +1,30 @@
 import React, {Component} from "react"
-import { Route, Switch, Redirect } from 'react-router-dom'
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom'
 import Web3 from "web3"
 import { connect } from 'react-redux'
+import { isWeb3Injected, getInjectedWEB3 } from "./contracts/web3"
+import getDipDapDoeInstance from "./contracts/dip-dap-doe"
+import { fetchOpenGames } from "./store/actions"
 
+import LoadingView from "./views/loading"
+import MessageView from "./views/message"
+import MainView from "./views/main"
+import GameView from "./views/game"
+import Container from "./widgets/container"
 
-const MainView = () => <div>Main View</div>
-const NewGameView = () => <div>New Game View</div>
-const GameView = () => <div>Game View</div>
-
-const LoadingView = () => <div>Loading View</div>
-const MessageView = props => <div>{props.message || ""}</div>
 
 class App extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      loading: true,
-      unsupported: false,
-      connected: false,
-      network: null,
-      accounts: []
-    }
-  }
 
   componentDidMount() {
-    if(window.web3 && window.web3.currentProvider) {
-      window.web3 = new Web3(window.web3.currentProvider)
+    if(isWeb3Injected()) {
+      let web3 = getInjectedWeb3()
+      this.DipDapDoe = getDipDapDoeInstance()
 
+     web3.eth.getBlockNumber().then(blockNumber => {
+       this.props.dispatch({type: "SET_STARTING_BLOCK", blockNumber })
+
+       return
+     })
       web3.eth.net.getNetworkType().then(id => {
           this.props.dispatch({type: "SET_NETWORK_ID", networkId: id})
 
@@ -40,6 +37,24 @@ class App extends Component {
     }else{
       this.props.dispatch({ type: "SET_UNSUPPORTED" })
     }
+  }
+
+  checkWeb3Status(){
+    let web3 = getInjectedWEB3()
+    return web3.eth.net.isListening().then(listening => {
+    if(!listening){
+       this.props.dispatch({type: "SET_DISCONNECTED"})
+    }
+      return web3.eth.net.getNetworkType().then(id => {
+        this.props.dispatch({type: "SET_NETWORK_ID", networkId: id})
+
+        return web3.eth.getAccounts().then(accounts => {
+          if(accounts.length != this.props.account.length || accounts[0] != this.props.accounts[0]){
+            this.props.dispatch({type: "SET", accounts})
+          }
+        })
+      })
+    })
   }
 
   render() {

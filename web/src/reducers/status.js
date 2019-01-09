@@ -2,10 +2,15 @@ const initialState = {
   loading: true,
   unsupported: false,
   connected: false,
-  networkId: null
+  networkId: null,
+  startingBlock: 0,
+  createdGames: JSON.parse(localStorage.getItem("createdGames") || "{}")
 }
 
 export default function reducer(state = initialState, action={}) {
+
+  let temp
+
    switch (action.type) {
      case 'SET_UNSUPPORTED':
         return Object.assign({}, state, {unsupported: true, loading: false})
@@ -19,8 +24,34 @@ export default function reducer(state = initialState, action={}) {
       case 'SET_NETWORK_ID':
           return Object.assign({}, state, {networkId: action.networkId})
 
+      case 'SET_STARTING_BLOCK':
+           return Object.assign({}, state, {startingBlock: action.blockNumber })
+
+      case 'ADD_CREATED_GAME':
+           if(!action.id || typeof action.number == "undefined" || !action.salt) return this.state
+
+           temp = Object.assign({}, state.createdGames, {
+             [action.id]: { number: action.number, salt: action.salt}
+           })
+           localStorage.setItem("createdGames", JSON.stringify(temp))
+
+           return Object.assign({}, state, {
+             createdGames: temp
+           })
+
+        case 'REMOVE_CREATED_GAME':
+           if(!action.id) return state
+
+           temp = Object.assign({}, state.createdGames)
+           delete temp[action.id]
+           localStorage.setItem("createdGames", JSON.stringify(temp))
+
+           return Object.assign({}, state, {
+             createdGames: temp
+           })
+
      default:
         return state
-       
+
    }
 }
